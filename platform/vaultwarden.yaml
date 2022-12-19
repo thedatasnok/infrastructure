@@ -12,6 +12,20 @@ spec:
   hostPath:
     path: /var/vaultwarden
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden
+  namespace: platform
+spec:
+  ports:
+  - name: vaultwarden-web
+    protocol: TCP
+    port: 80
+    targetPort: web
+  selector:
+    app: vaultwarden
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
