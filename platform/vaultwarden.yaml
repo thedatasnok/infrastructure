@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vaultwarden
+  namespace: platform
+spec:
+  selector:
+    matchLabels:
+      app: vaultwarden
+  serviceName: vaultwarden
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      containers:
+      - name: vaultwarden
+        image: vaultwarden/server:alpine
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: vaultwarden-data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: vaultwarden-data
+    spec:
+      storageClassName: manual
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi

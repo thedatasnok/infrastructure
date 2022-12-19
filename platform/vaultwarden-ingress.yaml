@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  name: vaultwarden-ingress
+  namespace: platform
+spec:
+  rules:
+  - host: vw.datasnok.cool
+    http:
+      paths:
+      - backend:
+          service:
+            name: vaultwarden
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - vw.datasnok.cool
+    secretName: apiserver-ingress-cert
