@@ -1,0 +1,13 @@
+{
+  "name": "environment-scaffolder",
+  "version": "1.0.0",
+  "description": "Environment scaffolder CLI for personal projects, using TypeScript to instrument GitHub and Kubernetes",
+  "main": "src/index.ts",
+  "scripts": {},
+  "author": "thedatasnok",
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^3.12.3",
+    "typescript": "^4.9.5"
+  }
+}
