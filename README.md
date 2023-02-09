@@ -32,11 +32,16 @@ Whether this changes in the future is unknown, but it should be possible to add 
 
 ## Let's Encrypt ClusterIssuer
 
+Once cert-manager is installed, a ClusterIssuer can be created to issue certificates from Let's Encrypt.
 
+The [letsencrypt-issuer.yaml](manifests/letsencrypt.yaml) file showcases how this can be done.
 
 ## External DNS
 
+To simplify maintaining A records for public facing services, I utilize External DNS. 
+This allows me to create Ingress resources, and External DNS will automatically create the A records for me in my DNS provider.
 
+The [externaldns.yaml](manifests/externaldns.yaml) file showcases how External DNS can be set up. Further details can be found on their [GitHub page](https://github.com/kubernetes-sigs/external-dns).
 
 ## VaultWarden
 
