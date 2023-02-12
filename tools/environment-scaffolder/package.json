@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Environment scaffolder CLI for personal projects, using TypeScript to instrument GitHub and Kubernetes",
   "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "build": "tsc"
   },
   "author": "thedatasnok",
   "license": "MIT",
