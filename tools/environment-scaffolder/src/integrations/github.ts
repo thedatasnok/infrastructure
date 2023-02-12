@@ -1,5 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import * as sodium from 'libsodium-wrappers';
+import dotenv from 'dotenv';
+import sodium from 'libsodium-wrappers';
+
+dotenv.config();
 
 const octokit = new Octokit({
   auth: process.env.GH_TOKEN,
@@ -15,7 +18,7 @@ export type ConfigMap = {
 
 /**
  * Creates or updates environment variables for a given environment in a given repository.
- * 
+ *
  * @param repositoryId the id of the repository to create the variables in
  * @param environmentName the name of the environment to create the variables in
  * @param variables the variables to create or update
