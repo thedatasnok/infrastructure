@@ -10,7 +10,9 @@ const kubeconfig = new KubeConfig();
 // this is typically ~/.kube/config
 kubeconfig.loadFromDefault();
 
+const server = kubeconfig.getCurrentCluster()?.server;
+
 const coreApi = kubeconfig.makeApiClient(CoreV1Api);
 const rbacApi = kubeconfig.makeApiClient(RbacAuthorizationV1Api);
 
-export { coreApi, rbacApi };
+export { coreApi, rbacApi, server };
