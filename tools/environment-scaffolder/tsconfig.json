@@ -4,7 +4,8 @@
     "strict": true,
     "target": "ES2022",
     "moduleResolution": "node",
-    "module": "ES2022"
+    "module": "ES2022",
+    "esModuleInterop": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]
