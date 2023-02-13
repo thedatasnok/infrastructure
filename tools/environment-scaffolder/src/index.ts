@@ -3,7 +3,15 @@ import octokit, {
   createOrUpdateSecrets,
   createOrUpdateVariables,
 } from './integrations/github';
-import { coreApi, rbacApi, server } from './integrations/kubernetes';
+import {
+  coreApi,
+  createOrUpdateNamespace,
+  createOrUpdateNamespacedRole,
+  createOrUpdateNamespacedRoleBinding,
+  createOrUpdateNamespacedSecret,
+  createOrUpdateNamespacedServiceAccount,
+  server,
+} from './integrations/kubernetes';
 
 const repositoryOwner = 'thedatasnok';
 const repositoryName = 'fullstack-demo';
@@ -31,7 +39,7 @@ try {
   process.exit(1);
 }
 
-await coreApi.createNamespace({
+await createOrUpdateNamespace({
   metadata: {
     name: namespace,
     labels: {
@@ -42,7 +50,7 @@ await coreApi.createNamespace({
 
 const SERVICE_ACCOUNT_NAME = 'workflows-sa';
 
-await coreApi.createNamespacedServiceAccount(namespace, {
+await createOrUpdateNamespacedServiceAccount(namespace, {
   metadata: {
     name: SERVICE_ACCOUNT_NAME,
   },
@@ -50,7 +58,7 @@ await coreApi.createNamespacedServiceAccount(namespace, {
 
 const ROLE_NAME = 'full-access';
 
-await rbacApi.createNamespacedRole(namespace, {
+await createOrUpdateNamespacedRole(namespace, {
   metadata: {
     name: ROLE_NAME,
   },
@@ -63,7 +71,7 @@ await rbacApi.createNamespacedRole(namespace, {
   ],
 });
 
-await rbacApi.createNamespacedRoleBinding(namespace, {
+await createOrUpdateNamespacedRoleBinding(namespace, {
   metadata: {
     name: 'workflows-sa-full-access',
   },
@@ -83,7 +91,7 @@ await rbacApi.createNamespacedRoleBinding(namespace, {
 
 const SECRET_NAME = 'workflows-sa-token';
 
-await coreApi.createNamespacedSecret(namespace, {
+await createOrUpdateNamespacedSecret(namespace, {
   type: 'kubernetes.io/service-account-token',
   metadata: {
     name: SECRET_NAME,
