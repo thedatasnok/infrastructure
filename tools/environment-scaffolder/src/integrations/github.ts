@@ -28,13 +28,31 @@ export const createOrUpdateVariables = async (
   environmentName: string,
   variables: ConfigMap
 ) => {
+  const existingVariables = await octokit.actions.listEnvironmentVariables({
+    environment_name: environmentName,
+    repository_id: repositoryId,
+  });
+
+  const existingVariableNames = existingVariables.data.variables.map(
+    (variable) => variable.name
+  );
+
   for (const [variableName, variableValue] of Object.entries(variables)) {
-    await octokit.actions.createEnvironmentVariable({
-      repository_id: repositoryId,
-      environment_name: environmentName,
-      name: variableName,
-      value: variableValue,
-    });
+    if (existingVariableNames.includes(variableName)) {
+      await octokit.actions.updateEnvironmentVariable({
+        repository_id: repositoryId,
+        environment_name: environmentName,
+        name: variableName,
+        value: variableValue,
+      });
+    } else {
+      await octokit.actions.createEnvironmentVariable({
+        repository_id: repositoryId,
+        environment_name: environmentName,
+        name: variableName,
+        value: variableValue,
+      });
+    }
   }
 };
 
