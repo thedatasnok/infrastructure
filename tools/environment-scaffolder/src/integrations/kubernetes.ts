@@ -27,23 +27,29 @@ export const createOrUpdateNamespace = async (
 ) => {
   const [namespace] = params;
 
-  if (namespace.metadata === undefined || namespace.metadata.name === undefined)
+  if (
+    namespace.body.metadata === undefined ||
+    namespace.body.metadata.name === undefined
+  )
     throw new Error();
 
   let upserted: V1Namespace;
 
   try {
-    await coreApi.readNamespace(namespace.metadata.name);
-    const updatedNamespace = await coreApi.replaceNamespace(
-      namespace.metadata.name,
-      namespace
-    );
+    await coreApi.readNamespace({
+      name: namespace.body.metadata.name,
+    });
 
-    upserted = updatedNamespace.body;
+    const updatedNamespace = await coreApi.replaceNamespace({
+      name: namespace.body.metadata.name,
+      body: namespace.body,
+    });
+
+    upserted = updatedNamespace;
   } catch (error) {
     const newNamespace = await coreApi.createNamespace(namespace);
 
-    upserted = newNamespace.body;
+    upserted = newNamespace;
   }
 
   return upserted;
@@ -52,35 +58,38 @@ export const createOrUpdateNamespace = async (
 export const createOrUpdateNamespacedServiceAccount = async (
   ...params: Parameters<typeof coreApi.createNamespacedServiceAccount>
 ) => {
-  const [namespace, serviceAccount] = params;
+  const [serviceAccount] = params;
 
   if (
-    serviceAccount.metadata === undefined ||
-    serviceAccount.metadata.name === undefined
+    serviceAccount.body === undefined ||
+    serviceAccount.body.metadata?.name === undefined
   )
     throw new Error();
 
   let upserted: V1ServiceAccount;
 
   try {
-    await coreApi.readNamespacedServiceAccount(
-      serviceAccount.metadata.name,
-      namespace
-    );
+    await coreApi.readNamespacedServiceAccount({
+      name: serviceAccount.body.metadata.name,
+      namespace: serviceAccount.namespace,
+    });
+
     const updatedServiceAccount = await coreApi.replaceNamespacedServiceAccount(
-      serviceAccount.metadata.name,
-      namespace,
-      serviceAccount
+      {
+        name: serviceAccount.body.metadata.name,
+        namespace: serviceAccount.namespace,
+        body: serviceAccount.body,
+      }
     );
 
-    upserted = updatedServiceAccount.body;
+    upserted = updatedServiceAccount;
   } catch (error) {
-    const newServiceAccount = await coreApi.createNamespacedServiceAccount(
-      namespace,
-      serviceAccount
-    );
+    const newServiceAccount = await coreApi.createNamespacedServiceAccount({
+      namespace: serviceAccount.namespace,
+      body: serviceAccount.body,
+    });
 
-    upserted = newServiceAccount.body;
+    upserted = newServiceAccount;
   }
 
   return upserted;
@@ -89,26 +98,33 @@ export const createOrUpdateNamespacedServiceAccount = async (
 export const createOrUpdateNamespacedRole = async (
   ...params: Parameters<typeof rbacApi.createNamespacedRole>
 ) => {
-  const [namespace, role] = params;
+  const [role] = params;
 
-  if (role.metadata === undefined || role.metadata.name === undefined)
+  if (role.body === undefined || role.body.metadata?.name === undefined)
     throw new Error();
 
   let upserted: V1Role;
 
   try {
-    await rbacApi.readNamespacedRole(role.metadata.name, namespace);
-    const updatedRole = await rbacApi.replaceNamespacedRole(
-      role.metadata.name,
-      namespace,
-      role
-    );
+    await rbacApi.readNamespacedRole({
+      namespace: role.namespace,
+      name: role.body.metadata.name,
+    });
 
-    upserted = updatedRole.body;
+    const updatedRole = await rbacApi.replaceNamespacedRole({
+      namespace: role.namespace,
+      name: role.body.metadata.name,
+      body: role.body,
+    });
+
+    upserted = updatedRole;
   } catch (error) {
-    const newRole = await rbacApi.createNamespacedRole(namespace, role);
+    const newRole = await rbacApi.createNamespacedRole({
+      namespace: role.namespace,
+      body: role.body,
+    });
 
-    upserted = newRole.body;
+    upserted = newRole;
   }
 
   return upserted;
@@ -117,35 +133,36 @@ export const createOrUpdateNamespacedRole = async (
 export const createOrUpdateNamespacedRoleBinding = async (
   ...params: Parameters<typeof rbacApi.createNamespacedRoleBinding>
 ) => {
-  const [namespace, roleBinding] = params;
+  const [roleBinding] = params;
 
   if (
-    roleBinding.metadata === undefined ||
-    roleBinding.metadata.name === undefined
+    roleBinding.body.metadata === undefined ||
+    roleBinding.body.metadata.name === undefined
   )
     throw new Error();
 
   let upserted: V1RoleBinding;
 
   try {
-    await rbacApi.readNamespacedRoleBinding(
-      roleBinding.metadata.name,
-      namespace
-    );
-    const updatedRoleBinding = await rbacApi.replaceNamespacedRoleBinding(
-      roleBinding.metadata.name,
-      namespace,
-      roleBinding
-    );
+    await rbacApi.readNamespacedRoleBinding({
+      namespace: roleBinding.namespace,
+      name: roleBinding.body.metadata.name,
+    });
 
-    upserted = updatedRoleBinding.body;
+    const updatedRoleBinding = await rbacApi.replaceNamespacedRoleBinding({
+      namespace: roleBinding.namespace,
+      name: roleBinding.body.metadata.name,
+      body: roleBinding.body,
+    });
+
+    upserted = updatedRoleBinding;
   } catch (error) {
-    const newRoleBinding = await rbacApi.createNamespacedRoleBinding(
-      namespace,
-      roleBinding
-    );
+    const newRoleBinding = await rbacApi.createNamespacedRoleBinding({
+      namespace: roleBinding.namespace,
+      body: roleBinding.body,
+    });
 
-    upserted = newRoleBinding.body;
+    upserted = newRoleBinding;
   }
 
   return upserted;
@@ -154,26 +171,36 @@ export const createOrUpdateNamespacedRoleBinding = async (
 export const createOrUpdateNamespacedSecret = async (
   ...params: Parameters<typeof coreApi.createNamespacedSecret>
 ) => {
-  const [namespace, secret] = params;
+  const [secret] = params;
 
-  if (secret.metadata === undefined || secret.metadata.name === undefined)
+  if (
+    secret.body.metadata === undefined ||
+    secret.body.metadata.name === undefined
+  )
     throw new Error();
 
   let upserted: V1Secret;
 
   try {
-    await coreApi.readNamespacedSecret(secret.metadata.name, namespace);
-    const updatedSecret = await coreApi.replaceNamespacedSecret(
-      secret.metadata.name,
-      namespace,
-      secret
-    );
+    await coreApi.readNamespacedSecret({
+      namespace: secret.namespace,
+      name: secret.body.metadata.name,
+    });
 
-    upserted = updatedSecret.body;
+    const updatedSecret = await coreApi.replaceNamespacedSecret({
+      namespace: secret.namespace,
+      name: secret.body.metadata.name,
+      body: secret.body,
+    });
+
+    upserted = updatedSecret;
   } catch (error) {
-    const newSecret = await coreApi.createNamespacedSecret(namespace, secret);
+    const newSecret = await coreApi.createNamespacedSecret({
+      namespace: secret.namespace,
+      body: secret.body,
+    });
 
-    upserted = newSecret.body;
+    upserted = newSecret;
   }
 
   return upserted;
@@ -184,17 +211,22 @@ export const createOrUpdateClusterRole = async (
 ) => {
   const [role] = params;
 
-  const roleName = role.metadata?.name;
+  const roleName = role.body.metadata?.name;
 
   if (roleName === undefined) throw new Error();
 
   let upserted: V1ClusterRole;
 
   try {
-    await rbacApi.readClusterRole(roleName);
-    upserted = (await rbacApi.replaceClusterRole(roleName, role)).body;
+    await rbacApi.readClusterRole({
+      name: roleName,
+    });
+    upserted = await rbacApi.replaceClusterRole({
+      name: roleName,
+      body: role.body,
+    });
   } catch (error) {
-    upserted = (await rbacApi.createClusterRole(role)).body;
+    upserted = await rbacApi.createClusterRole(role);
   }
 
   return upserted;
@@ -205,19 +237,22 @@ export const createOrUpdateClusterRoleBinding = async (
 ) => {
   const [roleBinding] = params;
 
-  const roleBindingName = roleBinding.metadata?.name;
+  const roleBindingName = roleBinding.body.metadata?.name;
 
   if (roleBindingName === undefined) throw new Error();
 
   let upserted: V1ClusterRoleBinding;
 
   try {
-    await rbacApi.readClusterRoleBinding(roleBindingName);
-    upserted = (
-      await rbacApi.replaceClusterRoleBinding(roleBindingName, roleBinding)
-    ).body;
+    await rbacApi.readClusterRoleBinding({
+      name: roleBindingName,
+    });
+    upserted = await rbacApi.replaceClusterRoleBinding({
+      name: roleBindingName,
+      body: roleBinding.body,
+    });
   } catch (error) {
-    upserted = (await rbacApi.createClusterRoleBinding(roleBinding)).body;
+    upserted = await rbacApi.createClusterRoleBinding(roleBinding);
   }
 
   return upserted;

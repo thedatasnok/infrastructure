@@ -43,35 +43,43 @@ const createEnvironment = async (
   }
 
   await createOrUpdateNamespace({
-    metadata: {
-      name: namespace,
-      labels: {
-        environment: environment,
+    body: {
+      metadata: {
+        name: namespace,
+        labels: {
+          environment: environment,
+        },
       },
     },
   });
 
   const SERVICE_ACCOUNT_NAME = 'workflows-sa';
 
-  await createOrUpdateNamespacedServiceAccount(namespace, {
-    metadata: {
-      name: SERVICE_ACCOUNT_NAME,
+  await createOrUpdateNamespacedServiceAccount({
+    namespace,
+    body: {
+      metadata: {
+        name: SERVICE_ACCOUNT_NAME,
+      },
     },
   });
 
   const ROLE_NAME = 'full-access';
 
-  await createOrUpdateNamespacedRole(namespace, {
-    metadata: {
-      name: ROLE_NAME,
-    },
-    rules: [
-      {
-        apiGroups: ['', 'extensions', 'apps', 'networking.k8s.io'],
-        resources: ['*'],
-        verbs: ['*'],
+  await createOrUpdateNamespacedRole({
+    namespace,
+    body: {
+      metadata: {
+        name: ROLE_NAME,
       },
-    ],
+      rules: [
+        {
+          apiGroups: ['', 'extensions', 'apps', 'networking.k8s.io'],
+          resources: ['*'],
+          verbs: ['*'],
+        },
+      ],
+    },
   });
 
   const ROLE_BINDING_SUBJECT = {
@@ -80,61 +88,79 @@ const createEnvironment = async (
     namespace: namespace,
   };
 
-  await createOrUpdateNamespacedRoleBinding(namespace, {
-    metadata: {
-      name: 'workflows-sa-full-access',
+  await createOrUpdateNamespacedRoleBinding({
+    namespace,
+    body: {
+      metadata: {
+        name: 'workflows-sa-full-access',
+      },
+      roleRef: {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'Role',
+        name: ROLE_NAME,
+      },
+      subjects: [ROLE_BINDING_SUBJECT],
     },
-    roleRef: {
-      apiGroup: 'rbac.authorization.k8s.io',
-      kind: 'Role',
-      name: ROLE_NAME,
-    },
-    subjects: [ROLE_BINDING_SUBJECT],
   });
 
   const CRD_ROLE_NAME = 'crd-access-role';
 
   await createOrUpdateClusterRole({
-    metadata: {
-      name: CRD_ROLE_NAME,
-    },
-    rules: [
-      {
-        apiGroups: ['apiextensions.k8s.io'],
-        resources: ['customresourcedefinitions'],
-        verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete'],
+    body: {
+      metadata: {
+        name: CRD_ROLE_NAME,
       },
-    ],
+      rules: [
+        {
+          apiGroups: ['apiextensions.k8s.io'],
+          resources: ['customresourcedefinitions'],
+          verbs: [
+            'get',
+            'list',
+            'watch',
+            'create',
+            'update',
+            'patch',
+            'delete',
+          ],
+        },
+      ],
+    },
   });
 
   await createOrUpdateClusterRoleBinding({
-    metadata: {
-      name: 'workflows-sa-crd-access',
+    body: {
+      metadata: {
+        name: 'workflows-sa-crd-access',
+      },
+      roleRef: {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'ClusterRole',
+        name: CRD_ROLE_NAME,
+      },
+      subjects: [ROLE_BINDING_SUBJECT],
     },
-    roleRef: {
-      apiGroup: 'rbac.authorization.k8s.io',
-      kind: 'ClusterRole',
-      name: CRD_ROLE_NAME,
-    },
-    subjects: [ROLE_BINDING_SUBJECT],
   });
 
   const SECRET_NAME = 'workflows-sa-token';
 
-  await createOrUpdateNamespacedSecret(namespace, {
-    type: 'kubernetes.io/service-account-token',
-    metadata: {
-      name: SECRET_NAME,
-      annotations: {
-        'kubernetes.io/service-account.name': SERVICE_ACCOUNT_NAME,
+  await createOrUpdateNamespacedSecret({
+    namespace,
+    body: {
+      type: 'kubernetes.io/service-account-token',
+      metadata: {
+        name: SECRET_NAME,
+        annotations: {
+          'kubernetes.io/service-account.name': SERVICE_ACCOUNT_NAME,
+        },
       },
     },
   });
 
-  const { body: k8sSecret } = await coreApi.readNamespacedSecret(
-    SECRET_NAME,
-    namespace
-  );
+  const k8sSecret = await coreApi.readNamespacedSecret({
+    name: SECRET_NAME,
+    namespace,
+  });
 
   await octokit.repos.createOrUpdateEnvironment({
     owner: githubRepository.owner.login,
