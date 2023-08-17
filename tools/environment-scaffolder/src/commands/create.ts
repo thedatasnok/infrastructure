@@ -5,6 +5,8 @@ import octokit, {
 } from '../integrations/github';
 import {
   coreApi,
+  createOrUpdateClusterRole,
+  createOrUpdateClusterRoleBinding,
   createOrUpdateNamespace,
   createOrUpdateNamespacedRole,
   createOrUpdateNamespacedRoleBinding,
@@ -72,6 +74,12 @@ const createEnvironment = async (
     ],
   });
 
+  const ROLE_BINDING_SUBJECT = {
+    kind: 'ServiceAccount',
+    name: SERVICE_ACCOUNT_NAME,
+    namespace: namespace,
+  };
+
   await createOrUpdateNamespacedRoleBinding(namespace, {
     metadata: {
       name: 'workflows-sa-full-access',
@@ -81,13 +89,34 @@ const createEnvironment = async (
       kind: 'Role',
       name: ROLE_NAME,
     },
-    subjects: [
+    subjects: [ROLE_BINDING_SUBJECT],
+  });
+
+  const CRD_ROLE_NAME = 'crd-access-role';
+
+  await createOrUpdateClusterRole({
+    metadata: {
+      name: CRD_ROLE_NAME,
+    },
+    rules: [
       {
-        kind: 'ServiceAccount',
-        name: SERVICE_ACCOUNT_NAME,
-        namespace: namespace,
+        apiGroups: ['apiextensions.k8s.io'],
+        resources: ['customresourcedefinitions'],
+        verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete'],
       },
     ],
+  });
+
+  await createOrUpdateClusterRoleBinding({
+    metadata: {
+      name: 'workflows-sa-crd-access',
+    },
+    roleRef: {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'ClusterRole',
+      name: CRD_ROLE_NAME,
+    },
+    subjects: [ROLE_BINDING_SUBJECT],
   });
 
   const SECRET_NAME = 'workflows-sa-token';

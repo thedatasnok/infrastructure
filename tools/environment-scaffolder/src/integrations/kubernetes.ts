@@ -2,6 +2,8 @@ import {
   CoreV1Api,
   KubeConfig,
   RbacAuthorizationV1Api,
+  V1ClusterRole,
+  V1ClusterRoleBinding,
   V1Namespace,
   V1Role,
   V1RoleBinding,
@@ -172,6 +174,50 @@ export const createOrUpdateNamespacedSecret = async (
     const newSecret = await coreApi.createNamespacedSecret(namespace, secret);
 
     upserted = newSecret.body;
+  }
+
+  return upserted;
+};
+
+export const createOrUpdateClusterRole = async (
+  ...params: Parameters<typeof rbacApi.createClusterRole>
+) => {
+  const [role] = params;
+
+  const roleName = role.metadata?.name;
+
+  if (roleName === undefined) throw new Error();
+
+  let upserted: V1ClusterRole;
+
+  try {
+    await rbacApi.readClusterRole(roleName);
+    upserted = (await rbacApi.replaceClusterRole(roleName, role)).body;
+  } catch (error) {
+    upserted = (await rbacApi.createClusterRole(role)).body;
+  }
+
+  return upserted;
+};
+
+export const createOrUpdateClusterRoleBinding = async (
+  ...params: Parameters<typeof rbacApi.createClusterRoleBinding>
+) => {
+  const [roleBinding] = params;
+
+  const roleBindingName = roleBinding.metadata?.name;
+
+  if (roleBindingName === undefined) throw new Error();
+
+  let upserted: V1ClusterRoleBinding;
+
+  try {
+    await rbacApi.readClusterRoleBinding(roleBindingName);
+    upserted = (
+      await rbacApi.replaceClusterRoleBinding(roleBindingName, roleBinding)
+    ).body;
+  } catch (error) {
+    upserted = (await rbacApi.createClusterRoleBinding(roleBinding)).body;
   }
 
   return upserted;
