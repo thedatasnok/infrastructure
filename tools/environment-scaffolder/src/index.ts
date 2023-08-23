@@ -45,7 +45,7 @@ await yargs(hideBin(process.argv))
       hostname,
       delimiter = '-',
     }) => {
-      if (!repository || !repository.includes('/')) throw new Error();
+      if (!repository?.includes('/')) throw new Error();
       if (!environment) throw new Error();
       if (!namespacePrefix) throw new Error();
       if (!clusterIssuer) throw new Error();
