@@ -2,17 +2,17 @@ domain: datasnok.cool
 hostnames:
   - mail.datasnok.cool
 initialAccount:
+  enabled: true
   domain: datasnok.cool
   username: mailadmin
 logLevel: INFO
-mail:
-  authRatelimit: 100/minute;3600/hour
-  messageSizeLimitInMegabytes: 200
 persistence:
   size: 20Gi
-  storageClass: manual
-  hostPath: /var/mailu
 subnet: 10.1.0.0/16
+
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
 
 rspamd:
   resources:
